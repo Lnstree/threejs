@@ -7,7 +7,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 var light = new THREE.DirectionalLight(0xffffff, 1.5);
-light.position.set(0,0,1);
+light.position.set(0,0,20);
 scene.add(light);
 
 
