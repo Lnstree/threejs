@@ -10,7 +10,7 @@ var renderer;
 function initRenderer(){
     renderer = new THREE.WebGLRenderer({antialias:true});
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowEnabled=true;
+    renderer.shadowMapEnabled = true;
     document.body.appendChild(renderer.domElement);
 }
 
@@ -26,6 +26,7 @@ function initLight(){
     scene.add(new THREE.AmbientLight(0x444444));
     light = new THREE.PointLight(0xffffff);
     light.position.set(13,30, 10);
+    light.castShadow = true;
     scene.add(light);
 }
 
@@ -34,19 +35,33 @@ function initPlane(){
     var planGemotry = new THREE.PlaneGeometry(100, 100);
     var planMaterial = new THREE.MeshLambertMaterial({color:0x00fffff});
     planet = new THREE.Mesh(planGemotry, planMaterial);
-
-    planet.position.set(-10, -20, 0);
+    planet.position.set(-10, -10, 0);
     planet.rotation.x = -0.5 * Math.PI;
     planet.rotation.y = -0;
+    planet.receiveShadow = true;
     scene.add(planet);
 }
 
 function initModel(){
-    var sphereGeometry = new THREE.SphereGeometry(20, 10, 10);
+    var sphereGeometry = new THREE.SphereGeometry(10, 30, 10);
     var sphereMaterial = new THREE.MeshPhysicalMaterial({color:0xffffff});
     var sp = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    sp.position.set(0, 0, 0);
+    sp.castShadow = true;
+    sp.position.set(-20, 0, 0);
     scene.add(sp);
+
+
+    var sphereMaterial2 = new THREE.MeshLambertMaterial({color:0xffffff});
+    var sp2 = new THREE.Mesh(sphereGeometry, sphereMaterial2);
+    sp2.castShadow = true;
+    sp2.position.set(10, 0, 0);
+    scene.add(sp2);
+
+    var sphereMaterial3 = new THREE.MeshStandardMaterial({color:0xffffff});
+    var sp3 = new THREE.Mesh(sphereGeometry, sphereMaterial3);
+    sp3.position.set(10, 0, -30);
+    sp3.castShadow = true;
+    scene.add(sp3);
 }
 
 var controls;
@@ -78,6 +93,8 @@ function render(){
 
 function animate(){
     render();
+    controls.update();
+    requestAnimationFrame(animate)
 }
 
 function draw(){
@@ -86,8 +103,8 @@ function draw(){
     initLight();
     initPlane();
     initModel();
-    initControls();
     initCamera();
+    initControls();
     animate();
 }
 
