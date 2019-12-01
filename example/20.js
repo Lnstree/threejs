@@ -10,13 +10,18 @@ function initRenderer(){
 var camera;
 function initCamera(){
     camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 1, 1000);
-    camera.position.set(0, 100, 100);
+    camera.position.set(0, 0, 100);
 }
 
 
 var scene;
 function initScene(){
     scene = new THREE.Scene();
+}
+
+var controls;
+function initControls(){
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
 }
 
 
@@ -76,12 +81,20 @@ function  initModel(){
     hole3.absarc(0, 5, 2, 0, Math.PI, true);
     shape.holes.push(hole3);
 
+    shape.  
 
-
+    //  创建一个线框纹理
+    var wireFrameMat = new THREE.MeshBasicMaterial();
+    wireFrameMat.wireframe = true;
     var shapeGeometry = new THREE.ShapeGeometry(shape);
+
+    // 创建模型
+
     var material = new THREE.MeshPhongMaterial({color:0xff00ff});
     material.side = THREE.DoubleSide;
-    var mesh = new THREE.Mesh(shapeGeometry, material);
+
+    var mesh = THREE.SceneUtils.createMultiMaterialObject(shapeGeometry, [material, wireFrameMat]);
+    // var mesh = new THREE.Mesh(shapeGeometry, material);
     scene.add(mesh);
 }
 
@@ -90,6 +103,7 @@ function draw(){
     initScene();
     initCamera();
     initRenderer();
+    initControls();
     initLight();
     initModel();
     animate();
