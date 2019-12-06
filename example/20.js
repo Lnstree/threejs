@@ -81,7 +81,6 @@ function  initModel(){
     hole3.absarc(0, 5, 2, 0, Math.PI, true);
     shape.holes.push(hole3);
 
-    shape.  
 
     //  创建一个线框纹理
     var wireFrameMat = new THREE.MeshBasicMaterial();
