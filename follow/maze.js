@@ -48,55 +48,109 @@ function initModel(){
 }
 
 
+function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration) 
+{	
+	// note: texture passed by reference, will be updated by the update function.
+		
+	this.tilesHorizontal = tilesHoriz;
+	this.tilesVertical = tilesVert;
+	// how many images does this spritesheet contain?
+	//  usually equals tilesHoriz * tilesVert, but not necessarily,
+	//  if there at blank tiles at the bottom of the spritesheet. 
+	this.numberOfTiles = numTiles;
+	texture.wrapS = texture.wrapT = THREE.RepeatWrapping; 
+	texture.repeat.set( 1 / this.tilesHorizontal, 1 / this.tilesVertical );
+
+	// how long should each image be displayed?
+	this.tileDisplayDuration = tileDispDuration;
+
+	// how long has the current image been displayed?
+	this.currentDisplayTime = 0;
+
+	// which image is currently being displayed?
+	this.currentTile = 0;
+		
+	this.update = function( milliSec )
+	{
+		this.currentDisplayTime += milliSec;
+		while (this.currentDisplayTime > this.tileDisplayDuration)
+		{
+			this.currentDisplayTime -= this.tileDisplayDuration;
+			this.currentTile++;
+			if (this.currentTile == this.numberOfTiles)
+				this.currentTile = 0;
+			var currentColumn = this.currentTile % this.tilesHorizontal;
+			texture.offset.x = currentColumn / this.tilesHorizontal;
+			var currentRow = Math.floor( this.currentTile / this.tilesHorizontal );
+			texture.offset.y = currentRow / this.tilesVertical;
+		}
+	};
+}		
+
+var AM;
+
+function initSprite(){
+    var spriteMap = new THREE.TextureLoader().load('textures/mu.png');
+    // spriteMap.wrapS = spriteMap.wrapT = THREE.RepeatWrapping; 
+    // spriteMap.offset.x = 1;
+    // spriteMap.repeat.set(0.5, 1); 
+
+    AM = new TextureAnimator(spriteMap, 2, 1, 2, 100);
+    var spriteMaterial = new THREE.SpriteMaterial({ map: spriteMap, color: 0xffffff });
+    var sprite = new THREE.Sprite(spriteMaterial);
+
+
+    sprite.scale.set(10, 10, 1)
+    sprite.position.set(200, 20, 1);
+    scene.add(sprite);
+}
+
 var data ="\
-.........#...#.#...#.\
-.###.#####.###.#.###.\
-.#.....#.#...#.#.#.#.\
-.###.###.#.###.#.#.#.\
-.........#.#.....#.#.\
-.#.#.#.#.#.#.#####.#.\
-.#.#.#.#.............\
-.#.###.#####.#####.##\
-.#...#.....#.....#...\
-.###.###.#####.#.###.\
-.#.....#.....#.#...#.\
-.#.#.###.#.###.###.##\
-.#.#.#...#.#.#...#...\
-##.#####.#.#.#.###.#.\
-.......#.#...#.#...#.\
-.###.#.###.#.#####.##\
-...#.#...#.#.....#...\
-##.#.#.###.###.#####.\
-...#.#...#...#.....#.\
-##.#.###.#####.#.#.#.\
-...#...#...#...#.#.#."
+#####################\
+#...#.........#...#.#\
+###.#.#########.###.#\
+#...........#.......#\
+#.###.#######.#######\
+#.#.........#.....#.#\
+#####.#####.#.#.###.#\
+#.........#...#.#...#\
+#####.###.#.#.#.#.#.#\
+#.....#.#.#.#.#...#.#\
+#.#####.#.###.###.#.#\
+#.......#...#...#.#.#\
+#.#.#.#.#.#.#.#####.#\
+#.#.#.#.#.#.#...#...#\
+#.#######.#####.###.#\
+#.....#.......#.#...#\
+###.#########.#####.#\
+#...........#.#.....#\
+#.#.###.#.#######.###\
+#.#.#...#.......#...#\
+#####################";
         
 function drawMaze(width, height, data){
     let size = 10;
     var cubeMaterial  = new THREE.MeshPhysicalMaterial({color:0x3f3f3f});
     var cubeMaterial2 = new THREE.MeshPhysicalMaterial({color:0x8f3f3f});
 
-    for (var i=0; i < height+1; ++i){
-        for (var j = 0; j < width+1; j++){
-            str += data[i * width + j];
-            if (data[i * width + j] == "#"){
+    for (var i=0; i < height +1; ++i){
+        for (var j = 0; j < width +1; j++){
+            if (data[i * 21 + j] == "#"){
                     var cubeGeometry = new THREE.CubeGeometry(size, size, size);
                     var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
                     cube.position.set(j * size, size, i * size);
                     scene.add(cube);
             }else{
-                    var cubeGeometry = new THREE.CubeGeometry(size, size, size);
-                    var cube = new THREE.Mesh(cubeGeometry, cubeMaterial2);
-                    cube.position.set(j * size, size, i * size);
-                    scene.add(cube);
             }
         }
-       console.log(str);
     }
 }
+var clock = new THREE.Clock();
 
 function animation(){
     render.render(scene, camera);
+    var delta = clock.getDelta(); 
+    AM.update(1000 * delta);
     requestAnimationFrame(animation);
 }
 
@@ -108,6 +162,7 @@ function draw(){
     initLight();
     initControls();
     initModel();
+    initSprite();
     drawMaze(20, 20, data);
     animation();
 
